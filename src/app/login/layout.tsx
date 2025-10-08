@@ -3,8 +3,8 @@ import { type Metadata } from "next";
 import { TRPCReactProvider } from "@/trpc/react";
 
 export const metadata: Metadata = {
-  title: "adminHomePage",
-  description: "HomePage for Admin Layout",
+  title: "loginPage",
+  description: "Login Page",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 

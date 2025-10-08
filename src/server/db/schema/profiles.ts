@@ -1,7 +1,13 @@
 import { sql } from "drizzle-orm";
 import { createTable } from "@/server/db/index";
 import { index } from "drizzle-orm/pg-core";
-import { users, type ContactInfo, type CustomField, type ProfileSettings, type SocialLinks } from "@/server/db/schema/index";
+import {
+  users,
+  type ContactInfo,
+  type CustomField,
+  type ProfileSettings,
+  type SocialLinks,
+} from "@/server/db/schema/index";
 import { profileTheme } from "./_enums";
 
 export const profiles = createTable(

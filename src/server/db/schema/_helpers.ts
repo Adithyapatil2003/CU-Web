@@ -1,6 +1,11 @@
 import { sql, eq, getTableColumns } from "drizzle-orm";
 import { db } from "@/server/db";
-import { orders, updateStatusInputSchema, type OrderInsert, type OrderSelect } from "@/server/db/schema/index";
+import {
+  orders,
+  updateStatusInputSchema,
+  type OrderInsert,
+  type OrderSelect,
+} from "@/server/db/schema/index";
 
 export function getQrUrl(apiBase: string, id: string) {
   return `${apiBase}/api/qr/${id}/download`;

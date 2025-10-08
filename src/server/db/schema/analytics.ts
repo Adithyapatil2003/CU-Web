@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import { index } from "drizzle-orm/pg-core";
-import { profiles, users } from  "@/server/db/schema/index";
+import { profiles, users } from "@/server/db/schema/index";
 import type { Metadata } from "@/server/db/schema/_types";
 import { createTable } from "@/server/db/index";
 
