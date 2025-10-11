@@ -1,4 +1,3 @@
-// src/contexts/AnalyticsContext.tsx
 "use client";
 
 import {
@@ -12,12 +11,8 @@ import {
 } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
-// --- 1. Type Definitions for Absolute Type Safety 🛡️ ---
-
-// Type for the parameters object passed to gtag (generic GA event parameters)
 type GtagParams = Record<string, string | number | boolean | undefined>;
 
-// Define the shape of Google Analytics' global gtag function (if it exists)
 declare global {
   interface Window {
     gtag?: (
@@ -28,36 +23,47 @@ declare global {
   }
 }
 
-// 1. Define all application-specific events using a Discriminated Union.
-export type AppEvent =
-  | { type: "lead_generated"; source: string; medium: string; campaign: string }
-  | { type: "profile_view"; profileId: string; source: string }
-  | { type: "nfc_scan"; cardType: string; location: string }
-  | { type: "qr_scan"; qrType: string; source: string }
-  | { type: "demo_booked"; product: string; source: string }
-  | { type: "app_download"; platform: string }
-  | { type: "contact_form_submitted"; formType: string };
+export type DemoProduct = "Standard" | "Premium" | "Enterprise" | "Other";
+export type DemoSource = "cta_button" | "taponn" | "pricing_page" | "footer";
+export type AppPlatform = "IOS" | "Android" | "Windows" | "macOS";
+type LeadSource = "website_form" | "api_integration" | "referral";
+type LeadMedium = "web" | "partner" | "sales";
+type LeadCampaign = "Q4_Promo" | "Summer_Launch" | "Evergreen" | "None";
+type FormType = "Contact" | "Support" | "Feedback";
+type ProfileSource = "search" | "direct_link" | "internal";
+type NfcCardType = "Business" | "Personal" | "Access";
+type QrType = "Dynamic" | "Static" | "Product";
+type QrSource = "PrintAd" | "DigitalScreen" | "Email";
 
-// 2. Define the public interface for the hook
+export type AppEvent =
+  | {
+      type: "lead_generated";
+      source: LeadSource;
+      medium: LeadMedium;
+      campaign: LeadCampaign;
+    }
+  | { type: "profile_view"; profileId: string; source: ProfileSource }
+  | { type: "nfc_scan"; cardType: NfcCardType; location: string }
+  | { type: "qr_scan"; qrType: QrType; source: QrSource }
+  | { type: "demo_booked"; product: DemoProduct; source: DemoSource }
+  | { type: "app_download"; platform: AppPlatform }
+  | { type: "contact_form_submitted"; formType: FormType };
+
 interface AnalyticsContextType {
   logEvent: (event: AppEvent) => void;
+  trackDemoBooking: (product: DemoProduct, source: DemoSource) => void;
+  trackAppDownload: (platform: AppPlatform) => void;
 }
-
-// --- 2. Core Implementation ---
 
 const AnalyticsContext = createContext<AnalyticsContextType | undefined>(
   undefined,
 );
 
-// Helper to check if gtag is available
 const isGtagAvailable = (): boolean =>
   typeof window !== "undefined" && !!window.gtag;
 
-const GA_MEASUREMENT_ID = "GA_MEASUREMENT_ID"; // 💡 Replace with your actual GA ID
+const GA_MEASUREMENT_ID = "GA_MEASUREMENT_ID";
 
-/**
- * 💡 Hook to easily access typesafe analytics functions in any client component.
- */
 export const useAnalytics = (): AnalyticsContextType => {
   const context = useContext(AnalyticsContext);
   if (context === undefined) {
@@ -66,40 +72,28 @@ export const useAnalytics = (): AnalyticsContextType => {
   return context;
 };
 
-/**
- * 🚀 Centralized Analytics Provider for Next.js applications.
- */
 export const AnalyticsProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Construct the full path (memoized for stability)
   const fullPath = useMemo((): string => {
     return (
       pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : "")
     );
   }, [pathname, searchParams]);
 
-  /**
-   * 🔗 Base function to call the Google Analytics gtag event.
-   * This handles the low-level external library interaction.
-   */
   const trackGtagEvent = useCallback(
     (action: string, params: GtagParams): void => {
       if (isGtagAvailable() && window.gtag) {
         window.gtag("event", action, params);
-        // Optional: console.log(`GA Event: ${action}`, params);
+        console.log(`GA Event: ${action}`, params);
       }
     },
     [],
   );
 
-  /**
-   * ✨ Application-specific high-level event logging function.
-   * Maps the typesafe AppEvent to the GA parameter structure.
-   */
   const logEvent = useCallback(
     (event: AppEvent): void => {
       switch (event.type) {
@@ -160,7 +154,6 @@ export const AnalyticsProvider: FC<{ children: ReactNode }> = ({
           break;
 
         default:
-          // TypeScript Exhaustiveness Check
           const _exhaustiveCheck: never = event;
           return _exhaustiveCheck;
       }
@@ -168,12 +161,22 @@ export const AnalyticsProvider: FC<{ children: ReactNode }> = ({
     [trackGtagEvent],
   );
 
-  // --- 3. Page View Tracking ---
+  const trackDemoBooking = useCallback(
+    (product: DemoProduct, source: DemoSource): void => {
+      logEvent({ type: "demo_booked", product, source });
+    },
+    [logEvent],
+  );
 
-  // Track page views on route changes
+  const trackAppDownload = useCallback(
+    (platform: AppPlatform): void => {
+      logEvent({ type: "app_download", platform });
+    },
+    [logEvent],
+  );
+
   useEffect(() => {
     if (isGtagAvailable() && window.gtag) {
-      // Use 'config' to track page view in GA4
       window.gtag("config", GA_MEASUREMENT_ID, {
         page_path: fullPath,
         send_page_view: true,
@@ -184,8 +187,10 @@ export const AnalyticsProvider: FC<{ children: ReactNode }> = ({
   const contextValue = useMemo(
     () => ({
       logEvent,
+      trackDemoBooking,
+      trackAppDownload,
     }),
-    [logEvent],
+    [logEvent, trackDemoBooking, trackAppDownload],
   );
 
   return (

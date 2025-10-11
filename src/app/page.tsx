@@ -1,9 +1,18 @@
-import { HydrateClient } from "@/trpc/server";
+import React from "react";
+import Home from "./_components/layouts/HomePage/HeroPage";
+import DigitalProfile from "./_components/layouts/HomePage/DigitalProfile";
+import ProductsSection from "./_components/layouts/HomePage/Products";
+import TapAndRedirectSection from "./_components/layouts/HomePage/TapAndRedirectSection";
 
-export default async function Home() {
+const page = () => {
   return (
-    <HydrateClient>
-      <div>Main HomePage</div>
-    </HydrateClient>
+    <>
+      <Home />
+      <DigitalProfile />
+      <ProductsSection />
+      <TapAndRedirectSection/>
+    </>
   );
-}
+};
+
+export default page;
