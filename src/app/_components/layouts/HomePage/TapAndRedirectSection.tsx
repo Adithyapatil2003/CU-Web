@@ -1,70 +1,33 @@
-'use client'
+"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FC } from "react";
 import { motion, useInView } from "framer-motion";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import {
-  Smartphone,
-  QrCode,
-  CreditCard,
-  Mail,
-  Phone,
-  MapPin,
-  Globe,
-  Calendar,
-  MessageCircle,
-  Instagram,
-  Linkedin,
-  Twitter,
-  Youtube,
-  ArrowRight,
-  Zap,
-} from "lucide-react";
+import { Smartphone, QrCode, CreditCard, ArrowRight, Zap } from "lucide-react";
+import Image from "next/image";
+import Instagram from "@/app/_assets/Instagram.svg";
+import Linkedin from "@/app/_assets/Instagram.svg";
+import Phone from "@/app/_assets/Phone.svg";
+import X from "@/app/_assets/X.svg";
+import Youtube from "@/app/_assets/Youtube.svg";
+import WhatsApp from "@/app/_assets/WhatsApp.svg";
+import Globe from "@/app/_assets/Globe.svg";
+import Calendar from "@/app/_assets/Calendar.svg";
+import MapPin from "@/app/_assets/MapPin.svg";
+import Email from "@/app/_assets/Email.svg";
 
-const TapAndRedirectSection = () => {
-  const sectionRef = useRef(null);
+const TapAndRedirectSection: FC = () => {
+  const sectionRef = useRef<HTMLElement | null>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
-  const [activeStep, setActiveStep] = useState(0);
+  const [activeStep, setActiveStep] = useState<number>(0);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    // Animate steps on scroll
-    gsap.from(".step-card", {
-      x: -100,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.3,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top 80%",
-        end: "bottom 20%",
-        toggleActions: "play none none reverse",
-      },
-    });
-
-    // Animate phone mockup
-    gsap.from(".phone-mockup", {
-      y: 100,
-      opacity: 0,
-      duration: 1,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top 80%",
-        end: "bottom 20%",
-        toggleActions: "play none none reverse",
-      },
-    });
-
-    // Auto-advance steps
     const interval = setInterval(() => {
       setActiveStep((prev) => (prev + 1) % 3);
     }, 3000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
   const steps = [
@@ -91,6 +54,7 @@ const TapAndRedirectSection = () => {
   ];
 
   const contactLinks = [
+    // Lucide Icons (These are already functions)
     {
       icon: Phone,
       label: "Call",
@@ -98,19 +62,21 @@ const TapAndRedirectSection = () => {
       href: "tel:+1234567890",
     },
     {
-      icon: MessageCircle,
+      icon: WhatsApp,
       label: "WhatsApp",
       color: "bg-green-600",
       href: "https://wa.me/1234567890",
     },
     {
-      icon: Mail,
+      icon: Email,
       label: "Email",
       color: "bg-blue-500",
       href: "mailto:hello@taponn.com",
     },
+
+    // SVG Modules (These are objects at runtime, and SvgIconExtractor handles them)
     {
-      icon: Instagram,
+      icon: Instagram, // No more .default or explicit as SvgComponent is needed here
       label: "Instagram",
       color: "bg-pink-500",
       href: "https://instagram.com/taponn",
@@ -122,8 +88,8 @@ const TapAndRedirectSection = () => {
       href: "https://linkedin.com/in/taponn",
     },
     {
-      icon: Twitter,
-      label: "Twitter",
+      icon: X,
+      label: "X",
       color: "bg-blue-400",
       href: "https://twitter.com/taponn",
     },
@@ -133,6 +99,8 @@ const TapAndRedirectSection = () => {
       color: "bg-red-500",
       href: "https://youtube.com/taponn",
     },
+
+    // Remaining Lucide Icons
     {
       icon: Globe,
       label: "Website",
@@ -141,7 +109,7 @@ const TapAndRedirectSection = () => {
     },
     {
       icon: Calendar,
-      label: "Calendly",
+      label: "Calendar",
       color: "bg-blue-700",
       href: "https://calendly.com/taponn",
     },
@@ -215,6 +183,7 @@ const TapAndRedirectSection = () => {
                     <div
                       className={`h-12 w-12 bg-gradient-to-br ${step.color} flex flex-shrink-0 items-center justify-center rounded-xl`}
                     >
+                      {/* Lucide icon is a component and works directly */}
                       <step.icon className="h-6 w-6 text-white" />
                     </div>
                     <div>
@@ -311,7 +280,12 @@ const TapAndRedirectSection = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        <link.icon className="mb-2 h-6 w-6" />
+                        {/* 💥 FIX: Use the SvgIconExtractor component */}
+                        <Image
+                          src={link.icon}
+                          alt="{link.icon}"
+                          className="mb-2 h-6 w-6"
+                        />
                         <span className="text-xs font-medium">
                           {link.label}
                         </span>

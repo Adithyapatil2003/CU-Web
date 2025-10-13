@@ -1,4 +1,3 @@
-// src/contexts/ThemeContext.tsx
 "use client";
 
 import {
@@ -34,6 +33,11 @@ export const useTheme = (): ThemeContextType => {
 
 export const ThemeProvider: FC<ThemeProviderProps> = ({ children }) => {
   const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window === "undefined") {
+      // Return a default theme (e.g., false for light) during SSR
+      return false;
+    }
+
     const saved = localStorage.getItem("taponn-theme");
     if (saved) {
       return saved === "dark";

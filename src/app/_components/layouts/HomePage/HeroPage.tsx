@@ -1,4 +1,5 @@
 "use client";
+
 import {
   useAnalytics,
   type AppPlatform,
@@ -8,26 +9,34 @@ import {
 import { motion } from "framer-motion";
 import { Play, ArrowRight, Download, Sparkles } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
+// --- Typing Effect Constants ---
 const textToType = [
-  "Connect your digital presence with a single tap.",
-  "Manage leads, contacts, and appointments instantly.",
+  "Share Instantly.",
+  "Connect Effortlessly.",
+  "Grow Your Network.",
+  "Manage Leads Smartly.",
 ];
-const typingSpeed = 100;
-const erasingSpeed = 50;
+const typingSpeed = 50;
+const erasingSpeed = 30;
 const delayAfterTyped = 2000;
-const delayAfterErased = 1000;
+const delayAfterErased = 100;
 
-function TypingEffect() {
-  const [displayText, setDisplayText] = React.useState("");
-  const [index, setIndex] = React.useState(0);
-  const [textIndex, setTextIndex] = React.useState(0);
-  const [isTyping, setIsTyping] = React.useState(true);
+/**
+ * TypingEffect Component
+ * Handles the automatic typing and erasing of phrases in an array.
+ */
+const TypingEffect = () => {
+  const [displayText, setDisplayText] = useState("");
+  const [index, setIndex] = useState(0);
+  const [textIndex, setTextIndex] = useState(0);
+  const [isTyping, setIsTyping] = useState(true);
 
-  React.useEffect(() => {
-    let timeout: NodeJS.Timeout;
+  useEffect(() => {
+    let timeoutId;
 
+    // textToType is a constant, so the effect only needs textIndex
     const currentText = textToType[textIndex];
 
     if (!currentText) {
@@ -35,42 +44,50 @@ function TypingEffect() {
     }
 
     if (isTyping) {
+      // Logic for TYPING
       if (index < currentText.length) {
-        timeout = setTimeout(() => {
+        timeoutId = setTimeout(() => {
           setDisplayText((prev) => prev + currentText[index]);
           setIndex((prev) => prev + 1);
         }, typingSpeed);
       } else {
-        timeout = setTimeout(() => {
+        // Pause after typing is complete
+        timeoutId = setTimeout(() => {
           setIsTyping(false);
         }, delayAfterTyped);
       }
     } else {
+      // Logic for ERASING
       if (index > 0) {
-        timeout = setTimeout(() => {
+        timeoutId = setTimeout(() => {
           setDisplayText((prev) => prev.slice(0, -1));
           setIndex((prev) => prev - 1);
         }, erasingSpeed);
       } else {
-        timeout = setTimeout(() => {
+        // Move to next text after erasing is complete
+        timeoutId = setTimeout(() => {
           setIsTyping(true);
           setTextIndex((prev) => (prev + 1) % textToType.length);
         }, delayAfterErased);
       }
     }
 
-    return () => clearTimeout(timeout);
+    return () => clearTimeout(timeoutId);
+    // Refinement: Removed 'currentText' from dependencies as it's derived from 'textIndex' (already included).
   }, [index, isTyping, textIndex]);
 
   return (
     <span className="inline-block min-h-[1.2em]">
       {displayText}
-      <span className="typing-cursor">|</span>
+      {/* Typing cursor animation from CSS */}
+      <span className="typing-cursor text-primary-500 dark:text-primary-400">
+        |
+      </span>
     </span>
   );
-}
+};
 
-export default function Home() {
+export default function HeroPage() {
   const { trackDemoBooking, trackAppDownload } = useAnalytics();
 
   const handleDemoBooking = (product: DemoProduct, source: DemoSource) => {
@@ -83,74 +100,11 @@ export default function Home() {
 
   return (
     <>
-      <style jsx global>{`
-        @keyframes float {
-          0% {
-            transform: translateY(0) translateX(0);
-          }
-          50% {
-            transform: translateY(-20px) translateX(10px);
-          }
-          100% {
-            transform: translateY(0) translateX(0);
-          }
-        }
-        .animate-float {
-          animation: float 10s ease-in-out infinite;
-        }
-        .gradient-text {
-          background: linear-gradient(135deg, #3b82f6, #6366f1);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          color: #3b82f6; /* Fallback */
-        }
-        .btn-primary {
-          background-image: linear-gradient(145deg, #3b82f6, #6366f1);
-          color: white;
-          border-radius: 9999px;
-          transition:
-            transform 0.2s,
-            box-shadow 0.2s;
-          box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-        }
-        .btn-primary:hover {
-          box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
-        }
-        .btn-secondary {
-          background-color: #f3f4f6;
-          color: #1f2937;
-          border-radius: 9999px;
-          transition:
-            transform 0.2s,
-            background-color 0.2s;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        .dark .btn-secondary {
-          background-color: #374151;
-          color: #d1d5db;
-        }
-        .typing-cursor {
-          opacity: 1;
-          animation: blink 0.7s infinite;
-          font-weight: 300;
-        }
-        @keyframes blink {
-          0%,
-          100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0;
-          }
-        }
-      `}</style>
       <section
-        className="from-primary-50 to-accent-50 relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br via-white dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
+        className="dark:from[var(--primary-500)] relative flex min-h-screen items-center justify-center overflow-hidden bg-linear-150 from-[var(--primary-700)] via-white to-[var(--accent-700)] dark:via-black dark:to-[var(--accent-600)]"
         style={{ position: "relative", zIndex: 1 }}
       >
-        {/* Background Elements */}
         <div className="absolute inset-0">
-          {/* Animated Background Pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="bg-primary-300 animate-float absolute top-20 left-20 h-72 w-72 rounded-full mix-blend-multiply blur-xl filter"></div>
             <div
@@ -178,7 +132,7 @@ export default function Home() {
         {/* Floating Badges */}
         <div className="pointer-events-none absolute inset-0">
           <motion.div
-            className="animate-float absolute top-20 left-10 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-gray-700 backdrop-blur-sm dark:text-gray-300"
+            className="animate-floattop absolute top-20 left-10 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-gray-700 backdrop-blur-sm dark:text-gray-300"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}
@@ -188,7 +142,7 @@ export default function Home() {
           </motion.div>
 
           <motion.div
-            className="animate-float absolute top-32 right-20 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-gray-700 backdrop-blur-sm dark:text-gray-300"
+            className="animate-floatstop absolute top-32 right-20 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-gray-700 backdrop-blur-sm dark:text-gray-300"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.8 }}
@@ -198,7 +152,7 @@ export default function Home() {
           </motion.div>
 
           <motion.div
-            className="animate-float absolute bottom-32 left-20 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-gray-700 backdrop-blur-sm dark:text-gray-300"
+            className="animate-floatbottom absolute bottom-32 left-20 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-gray-700 backdrop-blur-sm dark:text-gray-300"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.8 }}
@@ -208,7 +162,7 @@ export default function Home() {
           </motion.div>
 
           <motion.div
-            className="animate-float absolute right-10 bottom-20 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-gray-700 backdrop-blur-sm dark:text-gray-300"
+            className="animate-floatsbottom absolute right-10 bottom-20 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-gray-700 backdrop-blur-sm dark:text-gray-300"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.1, duration: 0.8 }}
@@ -233,14 +187,13 @@ export default function Home() {
 
             {/* Typed Subtitle */}
             <motion.div
-              className="text-stable relative z-10 mb-8 min-h-[3rem] text-2xl font-medium text-gray-700 md:text-3xl lg:text-4xl dark:text-gray-300"
+              className="relative z-10 mt-4 mb-8 min-h-[3rem] text-2xl font-medium text-gray-700 md:mt-6 md:text-3xl lg:text-4xl dark:text-gray-300"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
             >
-              <span className="typed-text text-stable"></span>
+              <TypingEffect />
             </motion.div>
-
             {/* CTA Buttons */}
             <motion.div
               className="text-stable relative z-10 mt-12 mb-16 flex flex-col items-center justify-center gap-4 sm:flex-row"

@@ -4,6 +4,9 @@ import "@/styles/globals.css";
 import { TRPCReactProvider } from "@/trpc/react";
 import Script from "next/script";
 import { AnalyticsProvider } from "@/contexts/analyticsContext";
+import Navbar from "./_components/layouts/NavBar";
+import { ThemeProvider } from "@/contexts/themeContext";
+import { AuthProvider } from "@/contexts/authContext";
 
 export const metadata: Metadata = {
   title: "mainHomePage",
@@ -32,7 +35,14 @@ export default function RootLayout({
       </head>
       <body>
         <TRPCReactProvider>
-          <AnalyticsProvider>{children}</AnalyticsProvider>
+          <AnalyticsProvider>
+            <ThemeProvider>
+              <AuthProvider>
+                <Navbar />
+                {children}
+              </AuthProvider>
+            </ThemeProvider>
+          </AnalyticsProvider>
         </TRPCReactProvider>
       </body>
     </html>

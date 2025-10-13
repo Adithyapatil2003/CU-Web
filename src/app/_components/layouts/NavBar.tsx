@@ -1,45 +1,33 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sun, Moon, Menu, X, User, LogOut, ChevronDown } from "lucide-react";
 import { useTheme } from "@/contexts/themeContext";
+import { Sun, Moon, Menu, X, User, LogOut, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/authContext";
-
-const useAuth = () => {
-  const [user] = useState({ name: "Jane Doe" });
-  const [isAuthenticated] = useState(true);
-  const logout = () => {
-    console.log("User logged out");
-  };
-  return { user, logout, isAuthenticated };
-};
-// ----------------------------------------
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { isDark, toggleTheme } = useTheme();
+  const location = usePathname();
   const { user, logout, isAuthenticated } = useAuth();
-  const pathname = usePathname();
 
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    if (typeof window !== "undefined") {
-      window.addEventListener("scroll", handleScroll);
-      return () => window.removeEventListener("scroll", handleScroll);
-    }
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Close mobile menu on route change
   useEffect(() => {
     setIsOpen(false);
-  }, [pathname]);
+  }, [location]);
 
   const navItems = [
     { name: "Home", path: "/" },
@@ -80,13 +68,13 @@ const Navbar = () => {
                 key={item.name}
                 href={item.path}
                 className={`relative text-sm font-medium transition-colors duration-200 ${
-                  pathname === item.path
+                  location === item.path
                     ? "text-primary-600 dark:text-primary-400"
                     : "hover:text-primary-600 dark:hover:text-primary-400 text-gray-700 dark:text-gray-300"
                 }`}
               >
                 {item.name}
-                {pathname === item.path && (
+                {location === item.path && (
                   <motion.div
                     layoutId="activeTab"
                     className="bg-primary-600 dark:bg-primary-400 absolute right-0 -bottom-1 left-0 h-0.5"
@@ -113,7 +101,7 @@ const Navbar = () => {
               <div className="group relative">
                 <button className="bg-primary-600 hover:bg-primary-700 flex items-center space-x-2 rounded-lg px-4 py-2 text-white transition-colors">
                   <User size={16} />
-                  <span>{user?.name || "User"}</span>
+                  <span>{user?.name}</span>
                   <ChevronDown size={16} />
                 </button>
 
@@ -186,7 +174,7 @@ const Navbar = () => {
                   key={item.name}
                   href={item.path}
                   className={`block text-base font-medium ${
-                    pathname === item.path
+                    location === item.path
                       ? "text-primary-600 dark:text-primary-400"
                       : "hover:text-primary-600 dark:hover:text-primary-400 text-gray-700 dark:text-gray-300"
                   }`}
